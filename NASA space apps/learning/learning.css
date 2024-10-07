@@ -1,0 +1,79 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+    background-image: url('https://www.solarsystemscope.com/textures/download/2k_stars_milky_way.jpg');
+  }
+  
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto;
+    gap: 10px;
+    width: 80%;
+    max-width: 1200px;
+    height: 80%;
+  }
+  
+  .grid-box {
+    background-color: #0078d7;
+    color: #ffffff;
+    border: 2px solid #005fa8;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 16px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .grid-box.large {
+    grid-column: span 2;
+    grid-row: span 1;
+  }
+  
+  .grid-box h2 {
+    margin-bottom: 10px;
+  }
+  
+  .grid-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    background-color: #005fa8;
+  }
+  
+  @media (max-width: 768px) {
+    .grid-container {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  
+    .grid-box.large {
+      grid-column: span 2;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .grid-container {
+      grid-template-columns: 1fr;
+    }
+  
+    .grid-box.large {
+      grid-column: span 1;
+    }
+  }
+  
+h1{
+    font-size: 40px;
+    font-weight: 14px;
+}

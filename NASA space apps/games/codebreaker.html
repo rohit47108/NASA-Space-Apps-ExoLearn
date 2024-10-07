@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exoplanet Quiz</title>
+    <style>
+        h1{
+            font-size: 50px;
+            font-weight: 14px;
+            color: #fff;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+            background-image: url(https://www.solarsystemscope.com/textures/download/2k_stars_milky_way.jpg);
+        }
+        #question-container {
+            margin-bottom: 20px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #question-container p{
+            font-size: 27px;
+        }
+        #word-container {
+            font-size: 2em;
+            margin-bottom: 20px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        .input-letter {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            font-size: 30px;
+            text-align: center;
+            line-height: 50px;
+            border: 1px solid #333;
+            margin: 5px;
+            background-color: #eaeaea;
+            color: #333;
+            border-radius: 5px;
+        }
+        #input-container {
+            margin-top: 20px;
+        }
+        #input-container input {
+            font-size: 1.2em;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #rules {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Exoplanet Codebreaker</h1>
+    <br>
+    <br>
+    <br>
+    <br>
+    <div id="question-container">
+        <p id="question">Loading question...</p>
+        <div id="options"></div>
+    </div>
+
+    <div id="word-container">
+        <span class="input-letter" id="letter-1">_</span>
+        <span class="input-letter" id="letter-2">_</span>
+        <span class="input-letter" id="letter-3">_</span>
+        <span class="input-letter" id="letter-4">_</span>
+        <span class="input-letter" id="letter-5">_</span>
+        <span class="input-letter" id="letter-6">_</span>
+    </div>
+
+    <div id="input-container">
+        <input type="text" id="userInput" placeholder="Guess the word" disabled>
+        <button id="submit-btn" disabled>Submit</button>
+        <button id="rules-btn">Show Rules</button>
+    </div>
+
+    <div id="rules">
+        <h3>Game Rules</h3>
+        <p>Answer questions to earn letters. Collect the correct letters to form a 6-letter word. Type the word in the input box to win!</p>
+    </div>
+
+    <script>
+        const questions = [
+            { question: "What method detects exoplanets by measuring the dimming of a star?", options: ["Transit method", "Radial velocity", "Direct imaging", "Astrometry"], answer: "Transit method" },
+            { question: "What is the term for an exoplanet located in the 'habitable zone'?", options: ["Ice planet", "Gas giant", "Hot Jupiter", "Goldilocks planet"], answer: "Goldilocks planet" },
+            { question: "Which of the following is an exoplanet detection method?", options: ["Wobble method", "Magnetic field method", "Telescope method", "Doppler method"], answer: "Doppler method" },
+            { question: "What is a key factor for life on an exoplanet?", options: ["Distance from its star", "Type of star", "Color of the planet", "Magnetic field"], answer: "Distance from its star" },
+            { question: "What kind of exoplanet is mostly made of hydrogen and helium?", options: ["Ice giant", "Terrestrial planet", "Gas giant", "Dwarf planet"], answer: "Gas giant" },
+            { question: "Which planet-hunting mission was launched by NASA?", options: ["Kepler", "Hubble", "Spitzer", "Chandra"], answer: "Kepler" },
+            { question: "What is a common method for detecting exoplanets?", options: ["Light curve", "Lunar phase", "Magnetic field", "Solar rotation"], answer: "Light curve" },
+            { question: "Which planet in our solar system is most similar to terrestrial exoplanets?", options: ["Earth", "Mars", "Venus", "Mercury"], answer: "Earth" },
+            { question: "What is the closest exoplanet to Earth?", options: ["Proxima Centauri b", "Kepler-22b", "Trappist-1d", "51 Pegasi b"], answer: "Proxima Centauri b" },
+            { question: "How many confirmed exoplanets have been discovered?", options: ["Over 4000", "Around 100", "Nearly 1000", "Less than 50"], answer: "Over 4000" },
+            { question: "Which technique measures tiny shifts in the light from a star?", options: ["Radial velocity", "Transit method", "Microlensing", "Direct imaging"], answer: "Radial velocity" },
+            { question: "What defines a 'Hot Jupiter' exoplanet?", options: ["Close orbit to its star", "Small size", "Very cold temperature", "Far from its star"], answer: "Close orbit to its star" },
+            { question: "Which exoplanet discovery method uses gravitational lensing?", options: ["Microlensing", "Transit method", "Radial velocity", "Direct imaging"], answer: "Microlensing" },
+            { question: "What is an important factor for an exoplanet to have liquid water?", options: ["Being in the habitable zone", "Having a thick atmosphere", "Having a fast rotation", "Being very close to its star"], answer: "Being in the habitable zone" },
+            { question: "Which space telescope discovered the most exoplanets?", options: ["Kepler", "Hubble", "Spitzer", "James Webb"], answer: "Kepler" },
+            { question: "Which of these is not an exoplanet?", options: ["Jupiter", "51 Pegasi b", "HD 209458 b", "Trappist-1e"], answer: "Jupiter" },
+            { question: "Which exoplanet type is primarily made of rock?", options: ["Terrestrial planet", "Gas giant", "Ice giant", "Brown dwarf"], answer: "Terrestrial planet" },
+            { question: "How are exoplanets usually named?", options: ["By their host star", "Randomly", "By the shape", "By the color of the star"], answer: "By their host star" }
+        ];
+
+        const words = ["PLANET", "ORBIT", "KEPLER", "GALAXY", "STARRY", "NEBULA"];
+
+        let currentQuestionIndex = 0;
+        let letters = "";
+        let selectedWord = "";
+        let shuffledQuestions = [];
+
+        function shuffleQuestions() {
+            shuffledQuestions = questions.sort(() => 0.5 - Math.random()).slice(0, 6);  // Pick 6 random questions
+        }
+
+        function startGame() {
+            selectedWord = words[Math.floor(Math.random() * words.length)];  // Pick a random word
+            shuffleQuestions();
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                const currentQuestion = shuffledQuestions[currentQuestionIndex];
+                document.getElementById('question').textContent = currentQuestion.question;
+
+                const optionsContainer = document.getElementById('options');
+                optionsContainer.innerHTML = "";
+
+                currentQuestion.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.addEventListener('click', () => handleAnswer(option));
+                    optionsContainer.appendChild(button);
+                });
+            } else {
+                finishGame();
+            }
+        }
+
+        function handleAnswer(selectedOption) {
+            const correctAnswer = shuffledQuestions[currentQuestionIndex].answer;
+
+            if (selectedOption === correctAnswer) {
+                revealLetter();
+                currentQuestionIndex++;
+                displayQuestion();
+            } else {
+                resetGame();
+            }
+        }
+
+        function revealLetter() {
+            letters += selectedWord[currentQuestionIndex];
+            document.getElementById(`letter-${currentQuestionIndex + 1}`).textContent = selectedWord[currentQuestionIndex];
+            document.getElementById('userInput').disabled = false;
+            document.getElementById('submit-btn').disabled = false;
+        }
+
+        document.getElementById('submit-btn').addEventListener('click', checkWin);
+
+        function checkWin() {
+            const userInput = document.getElementById('userInput').value.toUpperCase();
+            if (userInput === selectedWord) {
+                alert("Congratulations! You've guessed the word!");
+                resetGame();
+            } else {
+                alert("Try again!");
+            }
+        }
+
+        function finishGame() {
+            document.getElementById('question').textContent = "Game Over! You answered all questions.";
+        }
+
+        function resetGame() {
+            currentQuestionIndex = 0;
+            letters = "";
+            selectedWord = "";
+            document.getElementById('userInput').value = "";
+            document.getElementById('userInput').disabled = true;
+            document.getElementById('submit-btn').disabled = true;
+            document.querySelectorAll('.input-letter').forEach(letter => letter.textContent = "_");
+            startGame();
+        }
+
+        document.getElementById('rules-btn').addEventListener('click', () => {
+            const rulesDiv = document.getElementById('rules');
+            rulesDiv.style.display = rulesDiv.style.display === "none" ? "block" : "none";
+        });
+
+        startGame();
+    </script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exoplanets</title>
+    <style>
+        /* Space-themed dynamic background */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background: url('https://www.solarsystemscope.com/textures/download/2k_stars_milky_way.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            color: #00ffff;
+            text-align: center;
+            font-size: 3rem;
+            text-shadow: 0 0 20px #00ffff; 
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin: 15px 0;
+        }
+
+        .question {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+        }
+
+        select, textarea, button {
+            font-size: 1.1rem;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #00ffff;
+            background-color: #001f3f;
+            color: white;
+            width: 100%;
+        }
+
+        button {
+            background-color: #00ffff;
+            color: black;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #00aaff;
+        }
+
+        /* Message styles */
+        .correct {
+            color: #00ff00;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .incorrect {
+            color: #ff4444;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff4444;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Review section */
+        #reviewSection {
+            margin: 30px 0;
+            padding: 30px;
+            background-color: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.9);
+        }
+
+        /* Make labels glow */
+        label {
+            color: #00ffff;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        /* Add animations */
+        @keyframes glow {
+            0% { box-shadow: 0 0 10px #00ffff; }
+            50% { box-shadow: 0 0 20px #00aaff; }
+            100% { box-shadow: 0 0 10px #00ffff; }
+        }
+
+        button, select, textarea {
+            animation: glow 0.75s ease-in-out infinite alternate;
+        }
+    </style>
+    <script>
+        let totalQuestions = 7;
+        let correctAnswers = 0;
+        let finalScore = 0; // Variable to track final score based on first attempts
+        let incorrectQuestions = [];
+        let explanations = {
+            'question1': 'An exoplanet is a planet outside our solar system.',
+            'question2': 'Exoplanets are detected by observing changes in the light or position of their host star.',
+            'question3': 'Exoplanets are classified by their size, composition, and temperature.',
+            'question4': 'Exoplanets are classified based on how their size and mass compare to planets in our solar system.',
+            'question5': 'The distance of an exoplanet from its star determines its temperature and habitability.',
+            'question6': 'The composition of an exoplanet’s atmosphere provides important clues for classification.',
+            'question7': 'Scientists classify some exoplanets based on their potential to support life.'
+        };
+
+        function checkAnswer(selectId, correctAnswer, nextSectionId) {
+    let userAnswer = document.getElementById(selectId).value;
+    let messageElement = document.getElementById(selectId + "-msg");
+    let selectElement = document.getElementById(selectId); // Get the select element
+
+    if (userAnswer === correctAnswer) {
+        if (!incorrectQuestions.includes(selectId)) { // Only increase score if the question wasn't previously answered incorrectly
+            correctAnswers++; // Increment correctAnswers only if it's the first correct attempt
+            finalScore++; // Increment final score
+        }
+        document.getElementById(nextSectionId).classList.remove('hidden');
+        messageElement.innerText = "Correct!";
+        messageElement.classList.add('correct');
+        selectElement.disabled = true;
+    } else {
+        // Check if the question is already in incorrectQuestions, if not, add it
+        if (!incorrectQuestions.includes(selectId)) {
+            incorrectQuestions.push(selectId); // Track incorrect answers once
+        }
+        messageElement.innerText = "Incorrect!";
+        messageElement.classList.add('incorrect');
+    }
+
+    // Stop the glow effect for this question
+    selectElement.classList.add('no-glow'); // Add the no-glow class
+
+    messageElement.classList.remove('hidden'); // Ensure message shows even after multiple clicks
+}
+
+
+
+        function submitOpenAnswer() {
+            var openAnswer = document.getElementById('openQuestion').value;
+            if (openAnswer.trim() === "") {
+                alert('Please provide an answer before submitting.');
+            } else {
+                document.getElementById('openQuestion').disabled = true;
+                document.getElementById('openQuestion-msg').innerText = "Thank you for your input!";
+                showReview(); // Show review after submitting open answer
+            }
+        }
+
+        function showReview() {
+            document.getElementById('reviewSection').classList.remove('hidden');
+            let reviewContent = '';
+            if (incorrectQuestions.length === 0) {
+                reviewContent = '<p>Congratulations! You answered all questions correctly.</p>';
+            } else {
+                reviewContent = '<p>Here’s a review of the questions you answered incorrectly:</p>';
+                incorrectQuestions.forEach((questionId) => {
+                    reviewContent += `<p><strong>Question:</strong> ${document.querySelector('label[for=' + questionId + ']').innerText}</p>`;
+                    reviewContent += `<p><strong>Explanation:</strong> ${explanations[questionId]}</p>`;
+                });
+            }
+
+            let score = `${finalScore}/${totalQuestions}`; // Use finalScore for the score
+            let percentage = Math.round((finalScore / totalQuestions) * 100);
+            reviewContent += `<p><strong>Your Score:</strong> ${score} (${percentage}%)</p>`;
+
+            document.getElementById('reviewContent').innerHTML = reviewContent;
+        }
+    </script>
+</head>
+<body>
+    <h1>The Classification of Exoplanets</h1>
+
+    <section id="section1">
+        <p>An exoplanet is a planet that orbits a star outside our solar system, unlike the planets in our own solar system. These distant worlds exist in the vast reaches of space, often hundreds or thousands of light-years away from Earth. Exoplanets come in various sizes, compositions, and orbital patterns, making them diverse and difficult to classify using traditional methods used for our solar system planets.</p>
+        <div class="question">
+            <label for="question1">What is an exoplanet?</label><br>
+            <select id="question1">
+                <option value="">--Select an answer--</option>
+                <option value="A">A. A planet outside the solar system</option>
+                <option value="B">B. A planet orbiting the Sun</option>
+                <option value="C">C. A moon orbiting a planet</option>
+                <option value="D">D. A star with planets</option>
+            </select>
+            <button onclick="checkAnswer('question1', 'A', 'section2')">Submit</button>
+            <p id="question1-msg"></p>
+        </div>
+    </section>
+
+    <section id="section2" class="hidden">
+        <p>The discovery of exoplanets depends on several advanced detection techniques, with the most common being the transit method and radial velocity. The transit method identifies planets when they pass in front of their host star, causing a slight dimming of the star’s light. The radial velocity method detects the tiny wobble in a star caused by the gravitational pull of an orbiting planet. These methods allow scientists to find exoplanets that are invisible to the naked eye.</p>
+        <div class="question">
+            <label for="question2"> How are exoplanets detected?</label><br>
+            <select id="question2">
+                <option value="">--Select an answer--</option>
+                <option value="A">A. By observing changes in a star's light</option>
+                <option value="B">B. By looking for their moons</option>
+                <option value="C">C. Using telescopes to find new stars</option>
+                <option value="D">D. Through analyzing their atmosphere directly</option>
+            </select>
+            <button onclick="checkAnswer('question2', 'A', 'section3')">Submit</button>
+            <p id="question2-msg"></p>
+        </div>
+    </section>
+
+    <section id="section3" class="hidden">
+        <p>Exoplanets are classified into several types based on their size, mass, and temperature. Some of the common types include gas giants, like Jupiter and Saturn, which are massive planets with thick atmospheres of hydrogen and helium. There are also rocky planets, similar to Earth, that may have solid surfaces, and ice giants, which contain large amounts of icy materials. Each type represents a different composition and environmental condition, contributing to their varied classification.</p>
+        <div class="question">
+            <label for="question3">What types of exoplanets exist?</label><br>
+            <select id="question3">
+                <option value="">--Select an answer--</option>
+                <option value="A">A. Only gas giants exist outside the solar system</option>
+                <option value="B">B. Exoplanets come in several types, including gas giants and rocky planets</option>
+                <option value="C">C. All exoplanets are icy planets</option>
+                <option value="D">D. There is only one type of exoplanet</option>
+            </select>
+            <button onclick="checkAnswer('question3', 'B', 'section4')">Submit</button>
+            <p id="question3-msg"></p>
+        </div>
+    </section>
+
+    <section id="section4" class="hidden">
+        <p>Exoplanets are often grouped by their size and mass relative to the planets in our solar system. For example, super-Earths are planets larger than Earth but smaller than Neptune, while mini-Neptunes are planets that are smaller than Neptune but still have thick atmospheres. Gas giants like Jupiter are the largest, and Earth-sized or smaller rocky planets are classified as terrestrial planets. This system of classification helps scientists predict what kind of environment might exist on each exoplanet.</p>
+        <div class="question">
+            <label for="question4">How are exoplanets classified by size and mass?</label><br>
+            <select id="question4">
+                <option value="">--Select an answer--</option>
+                <option value="A">A. All exoplanets are larger than Earth</option>
+                <option value="B">B. Only gas giants are classified by size</option>
+                <option value="C">C. Exoplanets are classified by their size relative to solar system planets</option>
+                <option value="D">D. Size does not matter when classifying exoplanets</option>
+            </select>
+            <button onclick="checkAnswer('question4', 'C', 'section5')">Submit</button>
+            <p id="question4-msg"></p>
+        </div>
+    </section>
+
+    <section id="section5" class="hidden">
+        <p>The distance between an exoplanet and its host star significantly impacts its classification, especially in terms of habitability and temperature. Planets that are too close to their stars may be too hot to sustain liquid water, while those that are too far away might be too cold. Exoplanets in the "habitable zone" are considered the most likely to support life because they could have liquid water. Distance also influences whether the planet is classified as a "hot Jupiter," "warm Neptune," or "cold super-Earth."</p>
+        <div class="question">
+            <label for="question5">How does distance from the host star affect exoplanet classification?</label><br>
+            <select id="question5">
+                <option value="">--Select an answer--</option>
+                <option value="A">A. The closer the planet is to the star, the more likely it can support life</option>
+                <option value="B">B. Planets far from the star are always warmer</option>
+                <option value="C">C. Exoplanet classification is influenced by their distance from the star</option>
+                <option value="D">D. All planets far from stars are gas giants</option>
+            </select>
+            <button onclick="checkAnswer('question5', 'C', 'section6')">Submit</button>
+            <p id="question5-msg"></p>
+        </div>
+    </section>
+
+    <section id="section6" class="hidden">
+        <p>Atmospheres play a critical role in classifying exoplanets, as they give clues about the planet's composition, potential weather patterns, and habitability. Some exoplanets have thick atmospheres filled with gases like hydrogen and helium, which are typical of gas giants. Others may have thinner, more Earth-like atmospheres with nitrogen and oxygen. Studying the atmosphere can reveal whether a planet has clouds, storms, or even the potential for life, which further refines its classification.</p>
+        <div class="question">
+            <label for="question6">How do exoplanets' atmospheres influence their classification?</label><br>
+            <select id="question6">
+                <option value="">--Select an answer--</option>
+                <option value="A">A. Atmospheres are ignored when classifying exoplanets</option>
+                <option value="B">B. Only gas giants have atmospheres</option>
+                <option value="C">C. An exoplanet’s atmosphere can reveal its composition and weather</option>
+                <option value="D">D. Planets with atmospheres are always habitable</option>
+            </select>
+            <button onclick="checkAnswer('question6', 'C', 'section7')">Submit</button>
+            <p id="question6-msg"></p>
+        </div>
+    </section>
+
+    <section id="section7" class="hidden">
+        <p>One of the most exciting aspects of exoplanet classification is the potential for habitability. Scientists are particularly interested in planets that lie within the "habitable zone" of their star, where conditions might allow for liquid water—an essential ingredient for life as we know it. Classifying exoplanets based on their ability to support life helps researchers prioritize which planets to study further in the search for extraterrestrial life.</p>
+        <div class="question">
+            <label for="question7">What role does the potential for habitability play in exoplanet classification?</label><br>
+            <select id="question7">
+                <option value="">--Select an answer--</option>
+                <option value="A">A. Only planets in the habitable zone are classified</option>
+                <option value="B">B. Planets outside the habitable zone are ignored</option>
+                <option value="C">C. Habitability is a factor when classifying some exoplanets</option>
+                <option value="D">D. All exoplanets are classified as potentially habitable</option>
+            </select>
+            <button onclick="checkAnswer('question7', 'C', 'openQuestionSection')">Submit</button>
+            <p id="question7-msg"></p>
+        </div>
+    </section>
+
+    <section id="openQuestionSection" class="hidden">
+        <p>In addition to the multiple-choice questions, please answer the following open-ended question:</p>
+        <textarea id="openQuestion" rows="4" cols="50" placeholder="In your opinion, what is the most important classication for an exoplanet."></textarea><br>
+        <button onclick="submitOpenAnswer()">Submit Open-Ended Answer</button>
+        <p id="openQuestion-msg"></p>
+    </section>
+
+    <section id="reviewSection" class="hidden">
+        <h2>Your Review</h2>
+        <div id="reviewContent"></div>
+    </section>
+</body>
+</html>

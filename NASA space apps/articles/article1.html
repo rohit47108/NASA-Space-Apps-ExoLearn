@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exoplanets</title>
+    <style>
+        /* Space-themed dynamic background */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background: url('https://www.solarsystemscope.com/textures/download/2k_stars_milky_way.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            color: #00ffff;
+            text-align: center;
+            font-size: 3rem;
+            text-shadow: 0 0 20px #00ffff;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin: 15px 0;
+        }
+
+        .question {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+        }
+
+        select, textarea, button {
+            font-size: 1.1rem;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #00ffff;
+            background-color: #001f3f;
+            color: white;
+            width: 100%;
+        }
+
+        button {
+            background-color: #00ffff;
+            color: black;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #00aaff;
+        }
+
+        /* Message styles */
+        .correct {
+            color: #00ff00;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .incorrect {
+            color: #ff4444;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff4444;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Review section */
+        #reviewSection {
+            margin: 30px 0;
+            padding: 30px;
+            background-color: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.9);
+        }
+
+        /* Make labels glow */
+        label {
+            color: #00ffff;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        /* Add animations */
+        @keyframes glow {
+            0% { box-shadow: 0 0 10px #00ffff; }
+            50% { box-shadow: 0 0 20px #00aaff; }
+            100% { box-shadow: 0 0 10px #00ffff; }
+        }
+
+        button, select, textarea {
+            animation: glow 0.75s ease-in-out infinite alternate;
+        }
+    </style>
+    <script>
+        let totalQuestions = 7;
+        let correctAnswers = 0;
+        let finalScore = 0; // Variable to track final score based on first attempts
+        let incorrectQuestions = [];
+        let explanations = {
+            'question1': 'Exoplanet research focuses on planets outside our solar system, aiming to find habitable worlds.',
+            'question2': 'The Transit Method detects exoplanets by observing a star’s dimming as a planet passes in front of it.',
+            'question3': 'Spectroscopy is used to study the atmospheres of exoplanets by analyzing starlight passing through them.',
+            'question4': 'The Kepler Telescope is renowned for discovering thousands of exoplanets, using the Transit Method.',
+            'question5': 'An exoplanet is a planet that orbits a star outside our solar system.',
+            'question6': 'Kepler-452b is often referred to as Earth’s twin due to its similar size and location in the habitable zone.',
+            'question7': 'Factors such as being in the habitable zone and having an atmosphere contribute to a planet’s potential habitability.'
+        };
+
+        function checkAnswer(selectId, correctAnswer, nextSectionId) {
+    let userAnswer = document.getElementById(selectId).value;
+    let messageElement = document.getElementById(selectId + "-msg");
+    let selectElement = document.getElementById(selectId); // Get the select element
+
+    if (userAnswer === correctAnswer) {
+        if (!incorrectQuestions.includes(selectId)) { // Only increase score if the question wasn't previously answered incorrectly
+            correctAnswers++; // Increment correctAnswers only if it's the first correct attempt
+            finalScore++; // Increment final score
+        }
+        document.getElementById(nextSectionId).classList.remove('hidden');
+        messageElement.innerText = "Correct!";
+        messageElement.classList.add('correct');
+        selectElement.disabled = true;
+    } else {
+        // Check if the question is already in incorrectQuestions, if not, add it
+        if (!incorrectQuestions.includes(selectId)) {
+            incorrectQuestions.push(selectId); // Track incorrect answers once
+        }
+        messageElement.innerText = "Incorrect!";
+        messageElement.classList.add('incorrect');
+    }
+
+    // Stop the glow effect for this question
+    selectElement.classList.add('no-glow'); // Add the no-glow class
+
+    messageElement.classList.remove('hidden'); // Ensure message shows even after multiple clicks
+}
+
+
+
+        function submitOpenAnswer() {
+            var openAnswer = document.getElementById('openQuestion').value;
+            if (openAnswer.trim() === "") {
+                alert('Please provide an answer before submitting.');
+            } else {
+                document.getElementById('openQuestion').disabled = true;
+                document.getElementById('openQuestion-msg').innerText = "Thank you for your input!";
+                showReview(); // Show review after submitting open answer
+            }
+        }
+
+        function showReview() {
+            document.getElementById('reviewSection').classList.remove('hidden');
+            let reviewContent = '';
+            if (incorrectQuestions.length === 0) {
+                reviewContent = '<p>Congratulations! You answered all questions correctly.</p>';
+            } else {
+                reviewContent = '<p>Here’s a review of the questions you answered incorrectly:</p>';
+                incorrectQuestions.forEach((questionId) => {
+                    reviewContent += `<p><strong>Question:</strong> ${document.querySelector('label[for=' + questionId + ']').innerText}</p>`;
+                    reviewContent += `<p><strong>Explanation:</strong> ${explanations[questionId]}</p>`;
+                });
+            }
+
+            let score = `${finalScore}/${totalQuestions}`; // Use finalScore for the score
+            let percentage = Math.round((finalScore / totalQuestions) * 100);
+            reviewContent += `<p><strong>Your Score:</strong> ${score} (${percentage}%)</p>`;
+
+            document.getElementById('reviewContent').innerHTML = reviewContent;
+        }
+    </script>
+</head>
+<body>
+    <h1>Exoplanets: The New Frontier</h1>
+
+    <section id="section1">
+        <p>Exoplanet research, a relatively new field in astronomy, has been gaining momentum since the discovery of the first exoplanet in 1992. Since then, astronomers have uncovered thousands of planets orbiting stars outside our solar system. These discoveries are crucial for understanding planetary formation and evolution across the galaxy. By studying the characteristics of these distant worlds, such as their size, mass, composition, and distance from their host stars, researchers hope to unravel the mysteries of planet diversity and the potential for habitability. Exoplanet studies also allow us to better grasp the uniqueness of our own planet, Earth.</p>
+        <div class="question">
+            <label for="question1">What was the year when the first exoplanet was discovered?</label><br>
+            <select id="question1">
+                <option value="">--Select an answer--</option>
+                <option value="1992">1992</option>
+                <option value="2001">2001</option>
+                <option value="1988">1988</option>
+            </select>
+            <button onclick="checkAnswer('question1', '1992', 'section2')">Submit</button>
+            <p id="question1-msg"></p>
+        </div>
+    </section>
+
+    <section id="section2" class="hidden">
+        <p>Scientists employ a variety of methods to detect exoplanets, often relying on indirect observation. One of the most successful techniques is the Transit Method. This method involves observing the dimming of a star when a planet passes in front of it, blocking a portion of the star’s light. However, this method requires precise timing and favorable alignments, as planets must cross directly between their star and Earth for detection. Other techniques, such as the Radial Velocity Method, detect the gravitational pull of a planet on its host star, causing the star to “wobble.”</p>
+        <div class="question">
+            <label for="question2">Which method involves detecting a star’s "wobble" due to a planet's gravitational pull?</label><br>
+            <select id="question2">
+                <option value="">--Select an answer--</option>
+                <option value="Transit Method">Transit Method</option>
+                <option value="Radial Velocity Method">Radial Velocity Method</option>
+                <option value="Direct Imaging">Direct Imaging</option>
+            </select>
+            <button onclick="checkAnswer('question2', 'Radial Velocity Method', 'section3')">Submit</button>
+            <p id="question2-msg"></p>
+        </div>
+    </section>
+
+    <section id="section3" class="hidden">
+        <p>While direct imaging is challenging due to the overwhelming brightness of stars compared to their planets, technological advancements have made it possible to photograph some exoplanets. Using sophisticated instruments that block out a star’s light, scientists can sometimes capture images of large, distant planets. These images, though rare, offer direct insights into the planetary systems beyond our own. Observing such planets through imaging allows researchers to study their atmosphere and orbit, providing clues about the planet’s environment and potential for life.</p>
+        <div class="question">
+            <label for="question3">What is the major challenge in capturing images of exoplanets?</label><br>
+            <select id="question3">
+                <option value="">--Select an answer--</option>
+                <option value="Distance">Distance</option>
+                <option value="Brightness of stars">Brightness of stars</option>
+                <option value="Planet size">Planet size</option>
+            </select>
+            <button onclick="checkAnswer('question3', 'Brightness of stars', 'section4')">Submit</button>
+            <p id="question3-msg"></p>
+        </div>
+    </section>
+
+    <section id="section4" class="hidden">
+        <p>Exoplanet atmospheres can be analyzed using a technique called spectroscopy. By studying the light that passes through a planet’s atmosphere, scientists can identify specific wavelengths that correspond to certain gases. For example, the presence of oxygen, methane, or water vapor might suggest the possibility of life or other significant chemical processes. In some cases, thermal imaging is also used to determine the temperature of the planet, providing further context about its habitability.</p>
+        <div class="question">
+            <label for="question4">Which of the following gases, when detected, could hint at the potential for life?</label><br>
+            <select id="question4">
+                <option value="">--Select an answer--</option>
+                <option value="Oxygen">Oxygen</option>
+                <option value="Hydrogen">Hydrogen</option>
+                <option value="Carbon Dioxide">Carbon Dioxide</option>
+            </select>
+            <button onclick="checkAnswer('question4', 'Oxygen', 'section5')">Submit</button>
+            <p id="question4-msg"></p>
+        </div>
+    </section>
+
+    <section id="section5" class="hidden">
+        <p>Among the many tools available for exoplanet exploration, the Kepler Space Telescope stands out. Launched in 2009, Kepler was designed to survey a portion of our galaxy to discover Earth-size planets in the habitable zones of their stars. By focusing on a fixed field of view, Kepler discovered thousands of exoplanets, revolutionizing our understanding of planetary systems. Its mission highlighted the diverse range of planets, including those that resemble Earth in size and temperature.</p>
+        <div class="question">
+            <label for="question5">What is the primary purpose of the Kepler Space Telescope?</label><br>
+            <select id="question5">
+                <option value="">--Select an answer--</option>
+                <option value="To study asteroids">To study asteroids</option>
+                <option value="To discover Earth-size planets">To discover Earth-size planets</option>
+                <option value="To observe the sun">To observe the sun</option>
+            </select>
+            <button onclick="checkAnswer('question5', 'To discover Earth-size planets', 'section6')">Submit</button>
+            <p id="question5-msg"></p>
+        </div>
+    </section>
+
+    <section id="section6" class="hidden">
+        <p>One of the most famous exoplanets discovered by the Kepler Space Telescope is Kepler-452b. Often referred to as "Earth's twin," Kepler-452b is similar in size and is located in the habitable zone of its star, where conditions might be right for liquid water to exist. This discovery sparked excitement about the possibility of finding life on similar planets.</p>
+        <div class="question">
+            <label for="question6">Why is Kepler-452b often referred to as "Earth’s twin"?</label><br>
+            <select id="question6">
+                <option value="">--Select an answer--</option>
+                <option value="Similar in size and located in the habitable zone">Similar in size and located in the habitable zone</option>
+                <option value="It orbits the same star as Earth">It orbits the same star as Earth</option>
+                <option value="It has water on its surface">It has water on its surface</option>
+            </select>
+            <button onclick="checkAnswer('question6', 'Similar in size and located in the habitable zone', 'section7')">Submit</button>
+            <p id="question6-msg"></p>
+        </div>
+    </section>
+
+    <section id="section7" class="hidden">
+        <p>The potential habitability of exoplanets depends on various factors, including their distance from their host stars, atmospheric conditions, and geological activity. A planet situated in the habitable zone, where temperatures allow for liquid water, is a prime candidate for supporting life. However, additional characteristics, such as having an atmosphere that can protect against harmful radiation and maintain stable temperatures, are also crucial.</p>
+        <div class="question">
+            <label for="question7">What factor contributes significantly to a planet’s potential habitability?</label><br>
+            <select id="question7">
+                <option value="">--Select an answer--</option>
+                <option value="Distance from its host star">Distance from its host star</option>
+                <option value="Size of the planet">Size of the planet</option>
+                <option value="Distance from Earth">Distance from Earth</option>
+            </select>
+            <button onclick="checkAnswer('question7', 'Distance from its host star', 'openQuestionSection')">Submit</button>
+            <p id="question7-msg"></p>
+        </div>
+    </section>
+
+    <section id="openQuestionSection" class="hidden">
+        <p>In addition to the multiple-choice questions, please answer the following open-ended question:</p>
+        <textarea id="openQuestion" rows="4" cols="50" placeholder="In your opinion, what is the most exciting aspect of exoplanet exploration?"></textarea><br>
+        <button onclick="submitOpenAnswer()">Submit Open-Ended Answer</button>
+        <p id="openQuestion-msg"></p>
+    </section>
+
+    <section id="reviewSection" class="hidden">
+        <h2>Your Review</h2>
+        <div id="reviewContent"></div>
+    </section>
+</body>
+</html>

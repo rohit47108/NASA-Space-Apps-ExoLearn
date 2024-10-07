@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Exoplanet Chatbot</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #001f3f;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .chat-container {
+            width: 450px;
+            margin: 50px auto;
+            background: #003366;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .chat-box {
+            height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            border-bottom: 1px solid #ffffff;
+        }
+
+        .chat-message {
+            margin: 10px 0;
+        }
+
+        .user-message {
+            text-align: right;
+            color: #00ccff;
+        }
+
+        .bot-message {
+            text-align: left;
+            color: #66ff99;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 80px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px;
+            border: none;
+            background-color: #00509e;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #003d7a;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-box" id="chat-box"></div>
+        <input type="text" id="user-input" placeholder="Ask me about exoplanets..." />
+        <button id="send-btn">Send</button>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById("chat-box");
+        const userInput = document.getElementById("user-input");
+        const sendBtn = document.getElementById("send-btn");
+
+        // Enhanced responses covering a broad range of exoplanet topics
+        const responses = {
+            "Hi": [
+                "Hello, how can I help you today!",
+            ],
+            "what are exoplanets?": [
+                "Exoplanets, or extrasolar planets, are worlds that orbit stars outside our solar system.",
+                "They vary widely in size, composition, and distance from their stars, offering a fascinating glimpse into planetary diversity.",
+                "Understanding exoplanets is crucial for answering the age-old question: Are we alone in the universe?"
+            ],
+            "how many exoplanets have been discovered?": [
+                "Currently, more than 5,000 exoplanets have been confirmed, with thousands more candidates awaiting verification.",
+                "The discovery of these worlds has surged thanks to missions like Kepler and TESS.",
+                "The ongoing exploration of exoplanets reveals new wonders about our galaxy and beyond."
+            ],
+            "what is the habitable zone?": [
+                "The habitable zone is the region around a star where conditions may be suitable for liquid water.",
+                "Often referred to as the 'Goldilocks zone,' it’s neither too hot nor too cold.",
+                "Finding exoplanets within this zone raises exciting possibilities for life beyond Earth!"
+            ],
+            "can exoplanets support life?": [
+                "Some exoplanets are located in their stars' habitable zones, making them potential candidates for life.",
+                "However, the exact conditions necessary for life as we know it are still under investigation.",
+                "The study of exoplanets enhances our understanding of life's potential elsewhere in the universe."
+            ],
+            "tell me about famous exoplanets": [
+                "Proxima Centauri b, located in the habitable zone of our nearest star, is a fascinating target for exploration.",
+                "Kepler-186f is notable for being the first Earth-sized planet found in the habitable zone of another star.",
+                "HD 209458 b, known as Osiris, was the first exoplanet discovered to transit its star, providing a wealth of data."
+            ],
+            "how are exoplanets detected?": [
+                "Exoplanets are primarily detected through methods such as the transit method and radial velocity.",
+                "The transit method measures dips in a star's brightness as a planet passes in front.",
+                "Radial velocity tracks the star's wobbles caused by the gravitational pull of an orbiting planet."
+            ],
+            "what's new in exoplanet research?": [
+                "Recent advancements include the use of space telescopes like James Webb to study exoplanet atmospheres.",
+                "New techniques allow scientists to analyze the composition of exoplanet atmospheres for potential biosignatures.",
+                "Exciting missions are planned to explore potentially habitable exoplanets in the coming years."
+            ],
+            "quit": [
+                "Goodbye! Keep pondering the mysteries of the universe.",
+                "Farewell! I'm here whenever you're ready to explore more about exoplanets."
+            ],
+            // Adding more queries and responses for advanced capabilities
+            "tell me about the kepler mission": [
+                "The Kepler mission was launched in 2009 to discover Earth-size planets orbiting other stars.",
+                "It has identified thousands of exoplanets, significantly advancing our understanding of planetary systems.",
+                "The mission utilized the transit method, continuously monitoring the brightness of over 150,000 stars."
+            ],
+            "what are hot jupiters?": [
+                "Hot Jupiters are gas giant exoplanets that orbit very close to their stars, resulting in high surface temperatures.",
+                "They challenge our understanding of planetary formation since they are often found in orbits where we wouldn’t expect large planets.",
+                "The study of Hot Jupiters can provide insight into atmospheric composition and weather patterns in extreme conditions."
+            ],
+            "what is a super earth?": [
+                "Super Earths are a category of exoplanets with a mass larger than Earth's but significantly less than that of Uranus or Neptune.",
+                "They can be rocky, gaseous, or a mix of both, and some lie in their star's habitable zone, raising possibilities for life.",
+                "Research on Super Earths focuses on their atmospheres and potential for supporting life."
+            ]
+        };
+
+        function addMessageToChat(message, isUser) {
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("chat-message");
+            messageDiv.classList.add(isUser ? "user-message" : "bot-message");
+            messageDiv.innerText = message;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
+        }
+
+        function levenshteinDistance(s1, s2) {
+            const d = [];
+            const lenS1 = s1.length;
+            const lenS2 = s2.length;
+
+            for (let i = 0; i <= lenS1; i++) {
+                d[i] = [i];
+            }
+            for (let j = 0; j <= lenS2; j++) {
+                d[0][j] = j;
+            }
+
+            for (let i = 1; i <= lenS1; i++) {
+                for (let j = 1; j <= lenS2; j++) {
+                    const cost = s1[i - 1] === s2[j - 1] ? 0 : 1;
+                    d[i][j] = Math.min(
+                        d[i - 1][j] + 1,    // Deletion
+                        d[i][j - 1] + 1,    // Insertion
+                        d[i - 1][j - 1] + cost // Substitution
+                    );
+                }
+            }
+            return d[lenS1][lenS2];
+        }
+
+        function getBestMatch(userMessage) {
+            let bestMatch = null;
+            let lowestDistance = Infinity;
+
+            for (const key in responses) {
+                const distance = levenshteinDistance(userMessage.toLowerCase(), key.toLowerCase());
+                if (distance < lowestDistance) {
+                    lowestDistance = distance;
+                    bestMatch = key;
+                }
+            }
+
+            return bestMatch;
+        }
+
+        function getResponse(userMessage) {
+            const matchedKey = getBestMatch(userMessage);
+            const foundResponse = matchedKey ? responses[matchedKey] : null;
+
+            // Fallback if no match found
+            return foundResponse ? foundResponse[Math.floor(Math.random() * foundResponse.length)] : 
+                                   "I'm not sure about that. Could you ask something else about exoplanets?";
+        }
+
+        sendBtn.addEventListener("click", () => {
+            const userMessage = userInput.value.trim();
+            if (userMessage) {
+                addMessageToChat(userMessage, true);
+                userInput.value = ""; // Clear the input
+
+                // Get the response from the bot
+                const botResponse = getResponse(userMessage);
+                addMessageToChat(botResponse, false);
+            }
+        });
+
+        // Allow pressing 'Enter' to send the message
+        userInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                sendBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>

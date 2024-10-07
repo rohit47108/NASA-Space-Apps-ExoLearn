@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exoplanet Match Game</title>
+    <style>
+        /* Body Styling */
+        body {
+            font-family: 'Orbitron', sans-serif; /* Futuristic font */
+            background: radial-gradient(circle, #000428, #004e92); /* Galaxy-like gradient */
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        /* Starry Background Animation */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+            z-index: -1;
+            animation: starry 100s infinite linear;
+            opacity: 0.2;
+        }
+
+        @keyframes starry {
+            0% { background-position: 0 0; }
+            100% { background-position: 2000px 2000px; }
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-shadow: 0 0 20px #00f9ff, 0 0 40px #00c3ff;
+            margin-bottom: 20px;
+        }
+
+        #game {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 20px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Card Styling */
+        .card {
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 2px solid #0077ff;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.4s ease, background-color 0.4s ease;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            box-shadow: 0 0 15px rgba(0, 119, 255, 0.4);
+            user-select: none;
+        }
+
+        .card:hover {
+            transform: rotateY(10deg) rotateX(5deg) scale(1.05); /* Tilt effect */
+            background-color: #111;
+        }
+
+        .matched {
+            background-color: #4CAF50;
+            box-shadow: 0 0 30px rgba(76, 175, 80, 0.6);
+            cursor: default;
+            transform: rotateY(360deg);
+        }
+
+        .incorrect {
+            background-color: #f44336;
+            box-shadow: 0 0 30px rgba(244, 67, 54, 0.6);
+        }
+
+        .selected {
+            background-color: #0077ff;
+        }
+
+        #timer, #score {
+            font-size: 24px;
+            margin: 10px 0;
+            text-shadow: 0 0 10px #0077ff;
+        }
+
+        #start {
+            margin-top: 20px;
+            background-color: #0077ff;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 119, 255, 0.7);
+        }
+
+        #start:hover {
+            background-color: #005ec2;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Exoplanet Match Game</h1>
+<div id="timer">Time: <span id="time">0</span> seconds</div>
+<div id="score">Score: <span id="score-value">0</span></div>
+<div id="game"></div>
+<button id="start">Start Game</button>
+
+<script>
+    const terms = [
+        { term: "Kepler-186f", definition: "First Earth-sized exoplanet found in habitable zone." },
+        { term: "Proxima Centauri b", definition: "Closest known exoplanet to the Solar System." },
+        { term: "HD 209458 b", definition: "First exoplanet observed transiting its star." },
+        { term: "TRAPPIST-1 d", definition: "One of the seven Earth-sized planets in the TRAPPIST-1 system." },
+        { term: "55 Cancri e", definition: "Super-Earth with a carbon-rich atmosphere." },
+        { term: "GJ 357 d", definition: "Potentially habitable super-Earth." },
+        { term: "LHS 1140 b", definition: "A super-Earth in the habitable zone of its star." },
+        { term: "K2-18 b", definition: "First exoplanet found to have water vapor." },
+        { term: "WASP-17b", definition: "One of the largest exoplanets discovered." },
+        { term: "WASP-121 b", definition: "Ultra-hot Jupiter with extreme atmospheric conditions." }
+    ];
+
+    let shuffledCards = [];
+    let selectedCards = [];
+    let score = 0;
+    let timer;
+    let secondsElapsed = 0;
+    let timerRunning = false;
+
+    document.getElementById('start').addEventListener('click', startGame);
+
+    function startGame() {
+        resetGame();
+        shuffledCards = shuffleArray(createPairs(terms));
+        createCards();
+        document.getElementById('game').style.opacity = 1;
+        startStopwatch();
+        document.getElementById('start').textContent = 'Reset Game';
+    }
+
+    function resetGame() {
+        clearInterval(timer);
+        secondsElapsed = 0;
+        score = 0;
+        document.getElementById('score-value').textContent = score;
+        document.getElementById('time').textContent = secondsElapsed;
+        document.getElementById('game').innerHTML = '';
+        selectedCards = [];
+        timerRunning = false;
+        document.getElementById('start').textContent = 'Start Game';
+    }
+
+    function startStopwatch() {
+        if (!timerRunning) {
+            timerRunning = true;
+            timer = setInterval(() => {
+                secondsElapsed++;
+                document.getElementById('time').textContent = secondsElapsed;
+            }, 1000);
+        }
+    }
+
+    function createCards() {
+        shuffledCards.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.dataset.id = index;
+            card.dataset.definition = item.definition;
+            card.dataset.term = item.term;
+            card.textContent = item.term;
+            card.addEventListener('click', () => handleCardClick(card));
+            document.getElementById('game').appendChild(card);
+        });
+    }
+
+    function handleCardClick(card) {
+        if (selectedCards.length < 2 && !card.classList.contains('matched') && !card.classList.contains('incorrect')) {
+            if (selectedCards.includes(card)) {
+                selectedCards = selectedCards.filter(selectedCard => selectedCard !== card);
+                card.classList.remove('selected');
+            } else {
+                selectedCards.push(card);
+                card.classList.add('selected');
+            }
+
+            if (selectedCards.length === 2) {
+                checkMatch();
+            }
+        }
+    }
+
+    function checkMatch() {
+        const [firstCard, secondCard] = selectedCards;
+
+        if (firstCard.dataset.term === secondCard.dataset.definition || firstCard.dataset.definition === secondCard.dataset.term) {
+            score++;
+            document.getElementById('score-value').textContent = score;
+            firstCard.classList.add('matched');
+            secondCard.classList.add('matched');
+            selectedCards = [];
+
+            setTimeout(() => {
+                firstCard.style.opacity = 0;
+                secondCard.style.opacity = 0;
+                firstCard.style.transition = 'opacity 1s';
+                secondCard.style.transition = 'opacity 1s';
+            }, 1000);
+
+            if (score === terms.length) {
+                clearInterval(timer);
+                alert("You won! Your score is: " + score + ". Time taken: " + secondsElapsed + " seconds.");
+            }
+        } else {
+            firstCard.classList.add('incorrect');
+            secondCard.classList.add('incorrect');
+            secondsElapsed += 3;
+            setTimeout(() => {
+                selectedCards = [];
+                firstCard.classList.remove('incorrect');
+                secondCard.classList.remove('incorrect');
+            }, 1000);
+        }
+
+        if (firstCard) firstCard.classList.remove('selected');
+        if (secondCard) secondCard.classList.remove('selected');
+    }
+
+    function createPairs(array) {
+        return array.flatMap(item => [
+            { term: item.term, definition: item.definition },
+            { term: item.definition, definition: item.term }
+        ]);
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+</script>
+</body>
+</html>

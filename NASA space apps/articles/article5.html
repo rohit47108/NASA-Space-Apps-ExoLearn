@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exoplanets</title>
+    <style>
+        /* Space-themed dynamic background */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background: url('https://www.solarsystemscope.com/textures/download/2k_stars_milky_way.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            color: #00ffff;
+            text-align: center;
+            font-size: 3rem;
+            text-shadow: 0 0 20px #00ffff;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin: 15px 0;
+        }
+
+        .question {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+        }
+
+        select, textarea, button {
+            font-size: 1.1rem;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #00ffff;
+            background-color: #001f3f;
+            color: white;
+            width: 100%;
+        }
+
+        button {
+            background-color: #00ffff;
+            color: black;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #00aaff;
+        }
+
+        /* Message styles */
+        .correct {
+            color: #00ff00;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .incorrect {
+            color: #ff4444;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff4444;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Review section */
+        #reviewSection {
+            margin: 30px 0;
+            padding: 30px;
+            background-color: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.9);
+        }
+
+        /* Make labels glow */
+        label {
+            color: #00ffff;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        /* Add animations */
+        @keyframes glow {
+            0% { box-shadow: 0 0 10px #00ffff; }
+            50% { box-shadow: 0 0 20px #00aaff; }
+            100% { box-shadow: 0 0 10px #00ffff; }
+        }
+
+        button, select, textarea {
+            animation: glow 0.75s ease-in-out infinite alternate;
+        }
+    </style>
+    <script>
+        let totalQuestions = 7;
+        let correctAnswers = 0;
+        let finalScore = 0; // Variable to track final score based on first attempts
+        let incorrectQuestions = [];
+        let explanations = {
+            'question1': 'The atmosphere of a planet has a significant impact on both its surface temperature and whether the planet could potentially support life. The composition of the atmosphere can trap heat or allow it to escape, influencing the overall climate of the planet.',
+            'question2': 'Spectroscopy is the method scientists use to study the atmospheres of exoplanets. It analyzes the light that passes through or reflects off the atmosphere, allowing scientists to identify which gases are present based on the absorption of specific wavelengths of light.',
+            'question3': 'Several factors, including the planets distance from its star, influence the composition of its atmosphere. This affects the type of gases present and the planets overall climate and conditions.',
+            'question4': 'A biosignature is a gas or other substance in a planet’s atmosphere that could indicate the presence of life. For example, gases like oxygen and methane can be produced by biological processes, making them potential signs of life.',
+            'question5': 'If an exoplanet is too close to its star, intense solar radiation and stellar winds can strip away its atmosphere, leaving the planet with a barren surface. This often happens to planets in close proximity to their stars.',
+            'question6': 'Greenhouse gases like carbon dioxide can trap heat in a planet’s atmosphere, leading to increased temperatures. This is similar to the greenhouse effect on Earth, where gases retain heat and warm the planet.',
+            'question7': 'Advanced space telescopes like the James Webb Space Telescope are equipped with tools to gather high-resolution data from distant planets. This data helps scientists study the atmospheres of exoplanets in much greater detail, providing insights into their composition and conditions.'
+        };
+
+        function checkAnswer(selectId, correctAnswer, nextSectionId) {
+    let userAnswer = document.getElementById(selectId).value;
+    let messageElement = document.getElementById(selectId + "-msg");
+    let selectElement = document.getElementById(selectId); // Get the select element
+
+    if (userAnswer === correctAnswer) {
+        if (!incorrectQuestions.includes(selectId)) { // Only increase score if the question wasn't previously answered incorrectly
+            correctAnswers++; // Increment correctAnswers only if it's the first correct attempt
+            finalScore++; // Increment final score
+        }
+        document.getElementById(nextSectionId).classList.remove('hidden');
+        messageElement.innerText = "Correct!";
+        messageElement.classList.add('correct');
+        selectElement.disabled = true;
+    } else {
+        // Check if the question is already in incorrectQuestions, if not, add it
+        if (!incorrectQuestions.includes(selectId)) {
+            incorrectQuestions.push(selectId); // Track incorrect answers once
+        }
+        messageElement.innerText = "Incorrect!";
+        messageElement.classList.add('incorrect');
+    }
+
+    // Stop the glow effect for this question
+    selectElement.classList.add('no-glow'); // Add the no-glow class
+
+    messageElement.classList.remove('hidden'); // Ensure message shows even after multiple clicks
+}
+
+
+
+        function submitOpenAnswer() {
+            var openAnswer = document.getElementById('openQuestion').value;
+            if (openAnswer.trim() === "") {
+                alert('Please provide an answer before submitting.');
+            } else {
+                document.getElementById('openQuestion').disabled = true;
+                document.getElementById('openQuestion-msg').innerText = "Thank you for your input!";
+                showReview(); // Show review after submitting open answer
+            }
+        }
+
+        function showReview() {
+            document.getElementById('reviewSection').classList.remove('hidden');
+            let reviewContent = '';
+            if (incorrectQuestions.length === 0) {
+                reviewContent = '<p>Congratulations! You answered all questions correctly.</p>';
+            } else {
+                reviewContent = '<p>Here’s a review of the questions you answered incorrectly:</p>';
+                incorrectQuestions.forEach((questionId) => {
+                    reviewContent += `<p><strong>Question:</strong> ${document.querySelector('label[for=' + questionId + ']').innerText}</p>`;
+                    reviewContent += `<p><strong>Explanation:</strong> ${explanations[questionId]}</p>`;
+                });
+            }
+
+            let score = `${finalScore}/${totalQuestions}`; // Use finalScore for the score
+            let percentage = Math.round((finalScore / totalQuestions) * 100);
+            reviewContent += `<p><strong>Your Score:</strong> ${score} (${percentage}%)</p>`;
+
+            document.getElementById('reviewContent').innerHTML = reviewContent;
+        }
+    </script>
+</head>
+<body>
+    <h1>Exoplanet Atmospheres: Windows into Alien Worlds</h1>
+
+    <section id="section1">
+        <p>The study of exoplanet atmospheres is one of the most exciting areas of modern astronomy. Atmospheres are critical in shaping the conditions of planets, influencing everything from surface temperature to the potential for supporting life. Scientists use specialized techniques to analyze exoplanet atmospheres, gaining valuable insights into their composition and behavior. Understanding these atmospheres not only helps us learn about distant worlds but also informs the search for habitable planets beyond our solar system.      </p>
+        <div class="question">
+            <label for="question1">What do atmospheres influence on exoplanets?</label><br>
+            <select id="question1">
+                <option value="">--Select an answer--</option>
+                <option value="Only the planets size">Only the planets size</option>
+                <option value="Surface temperature and potential for life">Surface temperature and potential for life</option>
+                <option value="The distance from the planet's star">The distance from the planet's star</option>
+                <option value="The number of moons it has">The number of moons it has</option>
+            </select>
+            <button onclick="checkAnswer('question1', 'Surface temperature and potential for life', 'section2')">Submit</button>
+            <p id="question1-msg"></p>
+        </div>
+    </section>
+
+    <section id="section2" class="hidden">
+        <p>One of the primary methods used to study exoplanet atmospheres is called spectroscopy. When light from a star passes through a planet’s atmosphere, certain wavelengths are absorbed by different gases, creating a unique pattern. By analyzing this light, scientists can determine which gases are present in the atmosphere. This technique is especially useful for identifying key components such as oxygen, methane, and water vapor, which are important for understanding whether a planet might support life.        </p>
+        <div class="question">
+            <label for="question2">What method do scientists use to study exoplanet atmospheres?</label><br>
+            <select id="question2">
+                <option value="">--Select an answer--</option>
+                <option value="Spectroscopy">Spectroscopy</option>
+                <option value="Tectonics">Tectonics</option>
+                <option value="Reflection analysis">Reflection analysis</option>
+                <option value="Doppler shifting">Doppler shifting</option>
+            </select>
+            <button onclick="checkAnswer('question2', 'Spectroscopy', 'section3')">Submit</button>
+            <p id="question2-msg"></p>
+        </div>
+    </section>
+
+    <section id="section3" class="hidden">
+        <p>Exoplanets can have a wide range of atmospheric compositions. Some atmospheres are rich in hydrogen and helium, similar to gas giants like Jupiter, while others may contain nitrogen and oxygen, more like Earth. The atmosphere’s makeup is shaped by several factors, including the planet's size, its distance from its star, and the chemical processes that occur within it. Understanding these factors is crucial for determining the nature of the planet’s climate and whether it could be hospitable to life.        </p>
+        <div class="question">
+            <label for="question3">What determines the composition of an exoplanet’s atmosphere?</label><br>
+            <select id="question3">
+                <option value="">--Select an answer--</option>
+                <option value="Doppler shifting">Doppler shifting</option>
+                <option value="Its magnetic field">Its magnetic field</option>
+                <option value="The number of moons">The number of moons</option>
+                <option value="Its distance from Earth">Its distance from Earth</option>
+            </select>
+            <button onclick="checkAnswer('question3', 'The planets distance from its star', 'section4')">Submit</button>
+            <p id="question3-msg"></p>
+        </div>
+    </section>
+
+    <section id="section4" class="hidden">
+        <p>One of the most exciting possibilities when studying exoplanet atmospheres is the detection of biosignatures—gases that may indicate the presence of life. For example, oxygen is produced by photosynthetic organisms on Earth, and methane can be a byproduct of microbial life. Detecting these gases on an exoplanet would be a tantalizing clue that life might exist there. However, non-biological processes can also produce these gases, so it’s important for scientists to carefully consider all possibilities before drawing conclusions.        </p>
+        <div class="question">
+            <label for="question4">What is a biosignature?</label><br>
+            <select id="question4">
+                <option value="">--Select an answer--</option>
+                <option value="A gas that may indicate life">A gas that may indicate life</option>
+                <option value="A measurement of a planet’s size">A measurement of a planet’s size</option>
+                <option value="The atmosphere’s distance from the planet">The atmosphere’s distance from the planet</option>
+                <option value="A planet’s gravitational pull">A planet’s gravitational pull</option>
+            </select>
+            <button onclick="checkAnswer('question4', 'A gas that may indicate life', 'section5')">Submit</button>
+            <p id="question4-msg"></p>
+        </div>
+    </section>
+
+    <section id="section5" class="hidden">
+        <p>Not all exoplanets have atmospheres. Some planets, especially those very close to their stars, may have had their atmospheres stripped away by solar winds and radiation. This leaves behind barren, rocky surfaces. On the other hand, some planets have extremely thick atmospheres that can trap heat, resulting in runaway greenhouse effects, similar to Venus. The presence or absence of an atmosphere has profound implications for the conditions on the planet’s surface and whether it could support life.        </p>
+        <div class="question">
+            <label for="question5">What can happen to an exoplanet's atmosphere if it is too close to its star?</label><br>
+            <select id="question5">
+                <option value="">--Select an answer--</option>
+                <option value="It can become thicker">It can become thicker</option>
+                <option value="It can be stripped away">It can be stripped away</option>
+                <option value="It can gain new elements">It can gain new elements</option>
+                <option value="It can reflect the star’s light">It can reflect the star’s light</option>
+            </select>
+            <button onclick="checkAnswer('question5', 'It can be stripped away', 'section6')">Submit</button>
+            <p id="question5-msg"></p>
+        </div>
+    </section>
+
+    <section id="section6" class="hidden">
+        <p>By studying atmospheres, scientists can also estimate surface temperatures on exoplanets. Thick atmospheres, particularly those rich in greenhouse gases, can trap heat and lead to scorching temperatures, as seen on Venus. Conversely, thin atmospheres or those with reflective clouds can cause a planet to cool down, sometimes leading to frozen conditions. This understanding is critical in evaluating whether a planet falls within the habitable zone, where temperatures might allow liquid water—a key ingredient for life.        </p>
+        <div class="question">
+            <label for="question6">What effect can greenhouse gases in an atmosphere have on a planet’s temperature?</label><br>
+            <select id="question6">
+                <option value="">--Select an answer--</option>
+                <option value="Cool it down">Cool it down</option>
+                <option value="Make it reflect sunlight">Make it reflect sunlight</option>
+                <option value="Trap heat and raise temperatures">Trap heat and raise temperatures</option>
+                <option value="It has water on its surface">Break down the planet’s surface</option>
+            </select>
+            <button onclick="checkAnswer('question6', 'Trap heat and raise temperatures', 'section7')">Submit</button>
+            <p id="question6-msg"></p>
+        </div>
+    </section>
+
+    <section id="section7" class="hidden">
+        <p>The study of exoplanet atmospheres is still in its early stages, but advancements in technology are making it easier to analyze distant planets in greater detail. Space telescopes like the James Webb Space Telescope are equipped with instruments that can gather high-resolution data on the atmospheres of far-off worlds. As technology improves, scientists hope to not only identify potentially habitable planets but also discover new types of atmospheres and climate systems that might exist beyond our imagination.        </p>
+        <div class="question">
+            <label for="question7">What is the role of advanced space telescopes like the James Webb in studying exoplanets?</label><br>
+            <select id="question7">
+                <option value="They help discover planets moons">They help discover planets moons</option>
+                <option value="They allow us to analyze exoplanet atmospheres in detail">They allow us to analyze exoplanet atmospheres in detail</option>
+                <option value="They find new stars in the universe">They find new stars in the universe</option>
+                <option value="They measure the planets gravity">They measure the planets gravity</option>
+            </select>
+            <button onclick="checkAnswer('question7', 'They allow us to analyze exoplanet atmospheres in detail', 'openQuestionSection')">Submit</button>
+            <p id="question7-msg"></p>
+        </div>
+    </section>
+
+    <section id="openQuestionSection" class="hidden">
+        <p>In addition to the multiple-choice questions, please answer the following open-ended question:</p>
+        <textarea id="openQuestion" rows="4" cols="50" placeholder="How might the discovery of a biosignature on an exoplanet change our understanding of life in the universe?"></textarea><br>
+        <button onclick="submitOpenAnswer()">Submit Open-Ended Answer</button>
+        <p id="openQuestion-msg"></p>
+    </section>
+
+    <section id="reviewSection" class="hidden">
+        <h2>Your Review</h2>
+        <div id="reviewContent"></div>
+    </section>
+</body>
+</html>

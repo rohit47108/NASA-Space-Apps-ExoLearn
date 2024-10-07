@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rags to Riches: Exoplanet Edition</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e6f5ff;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            background-image: url(https://www.solarsystemscope.com/textures/download/2k_stars_milky_way.jpg);
+        }
+
+        #game-container {
+            max-width: 700px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #0073e6;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #0073e6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        button:hover {
+            background-color: #005bb5;
+        }
+
+        #money {
+            font-size: 22px;
+            color: #28a745;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        #rules {
+            display: none;
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .question {
+            margin: 30px 0;
+            font-size: 20px;
+        }
+
+        .menu {
+            background-color: #f0f8ff;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .answer-buttons button {
+            width: 100%;
+            margin: 10px 0;
+            font-size: 18px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+
+<div id="game-container">
+    <h1>Rags to Riches: Exoplanet Edition</h1>
+
+    <div class="menu">
+        <div id="money">Money: $1</div>
+        <button onclick="toggleRules()">Show Rules</button>
+        <div id="rules">Answer questions to earn more money. First to $1 million wins!</div>
+    </div>
+
+    <div id="question-container" class="question">
+        <!-- Question will appear here -->
+    </div>
+
+    <div id="answer-buttons" class="answer-buttons">
+        <!-- Answer buttons will appear here -->
+    </div>
+</div>
+
+<script>
+    const questions = [
+        {
+            question: "What is the most common method used to detect exoplanets?",
+            answers: [
+                { text: "Transit method", correct: true },
+                { text: "Radial velocity method", correct: false },
+                { text: "Direct imaging", correct: false },
+                { text: "Gravitational lensing", correct: false }
+            ]
+        },
+        {
+            question: "Which type of exoplanet is most similar in size to Earth?",
+            answers: [
+                { text: "Super-Earth", correct: true },
+                { text: "Gas giant", correct: false },
+                { text: "Hot Jupiter", correct: false },
+                { text: "Ice giant", correct: false }
+            ]
+        },
+        {
+            question: "What is the habitable zone?",
+            answers: [
+                { text: "A region where liquid water might exist", correct: true },
+                { text: "A region with many stars", correct: false },
+                { text: "A region with no atmosphere", correct: false },
+                { text: "A region far from the host star", correct: false }
+            ]
+        },
+        {
+            question: "Which space telescope is known for discovering exoplanets?",
+            answers: [
+                { text: "Kepler", correct: true },
+                { text: "Hubble", correct: false },
+                { text: "Voyager", correct: false },
+                { text: "Cassini", correct: false }
+            ]
+        },
+        {
+            question: "Which exoplanet is likely to have a thick atmosphere?",
+            answers: [
+                { text: "Gas giant", correct: true },
+                { text: "Super-Earth", correct: false },
+                { text: "Terrestrial planet", correct: false },
+                { text: "Ice giant", correct: false }
+            ]
+        },
+        {
+            question: "What do scientists look for when searching for life on exoplanets?",
+            answers: [
+                { text: "Biosignatures", correct: true },
+                { text: "Rings", correct: false },
+                { text: "Solar flares", correct: false },
+                { text: "Auroras", correct: false }
+            ]
+        },
+        {
+            question: "Which type of exoplanet is the most massive?",
+            answers: [
+                { text: "Gas giant", correct: true },
+                { text: "Super-Earth", correct: false },
+                { text: "Terrestrial planet", correct: false },
+                { text: "Ice giant", correct: false }
+            ]
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let currentMoney = 1;
+    const moneyLevels = [1, 10, 100, 1000, 10000, 100000, 1000000];
+    let answered = false;
+
+    function initializeGame() {
+        currentQuestionIndex = 0;
+        currentMoney = 1;
+        document.getElementById("money").innerText = `Money: $${currentMoney}`;
+        answered = false;
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const questionContainer = document.getElementById("question-container");
+        const answerButtons = document.getElementById("answer-buttons");
+
+        const currentQuestion = questions[currentQuestionIndex];
+        questionContainer.innerHTML = `<p>${currentQuestion.question}</p>`;
+        answerButtons.innerHTML = '';
+
+        // Shuffle answers to make it unpredictable
+        const shuffledAnswers = [...currentQuestion.answers].sort(() => Math.random() - 0.5);
+
+        shuffledAnswers.forEach(answer => {
+            const button = document.createElement('button');
+            button.innerText = answer.text;
+            button.disabled = false;
+            button.addEventListener('click', () => selectAnswer(answer.correct, button));
+            answerButtons.appendChild(button);
+        });
+
+        answered = false;
+    }
+
+    function selectAnswer(isCorrect, selectedButton) {
+        if (answered) return;
+
+        if (isCorrect) {
+            currentMoney = moneyLevels[Math.min(moneyLevels.indexOf(currentMoney) + 1, moneyLevels.length - 1)];
+            document.getElementById("money").innerText = `Money: $${currentMoney}`;
+            if (currentMoney === 1000000) {
+                alert("Congratulations! You've won $1 million!");
+                initializeGame();
+                return;
+            } else {
+                setTimeout(nextQuestion, 1000); // Automatically go to the next question after 1 second
+            }
+        } else {
+            alert("Incorrect answer! Back to $1.");
+            setTimeout(initializeGame, 1000); // Reset the game after 1 second
+        }
+
+        // Disable all buttons after a selection
+        const buttons = document.querySelectorAll("#answer-buttons button");
+        buttons.forEach(button => button.disabled = true);
+        answered = true;
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex = (currentQuestionIndex + 1) % questions.length;
+        showQuestion();
+    }
+
+    function toggleRules() {
+        const rules = document.getElementById("rules");
+        rules.style.display = rules.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Start the game when the page loads
+    window.onload = initializeGame;
+</script>
+
+</body>
+</html>

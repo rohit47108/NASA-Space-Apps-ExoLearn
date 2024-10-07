@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exoplanets</title>
+    <style>
+        /* Space-themed dynamic background */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background: url('https://www.solarsystemscope.com/textures/download/2k_stars_milky_way.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            color: #00ffff;
+            text-align: center;
+            font-size: 3rem;
+            text-shadow: 0 0 20px #00ffff;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin: 15px 0;
+        }
+
+        .question {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+        }
+
+        select, textarea, button {
+            font-size: 1.1rem;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #00ffff;
+            background-color: #001f3f;
+            color: white;
+            width: 100%;
+        }
+
+        button {
+            background-color: #00ffff;
+            color: black;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #00aaff;
+        }
+
+        /* Message styles */
+        .correct {
+            color: #00ff00;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .incorrect {
+            color: #ff4444;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff4444;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Review section */
+        #reviewSection {
+            margin: 30px 0;
+            padding: 30px;
+            background-color: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.9);
+        }
+
+        /* Make labels glow */
+        label {
+            color: #00ffff;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        /* Add animations */
+        @keyframes glow {
+            0% { box-shadow: 0 0 10px #00ffff; }
+            50% { box-shadow: 0 0 20px #00aaff; }
+            100% { box-shadow: 0 0 10px #00ffff; }
+        }
+
+        button, select, textarea {
+            animation: glow 0.75s ease-in-out infinite alternate;
+        }
+    </style>
+    <script>
+        let totalQuestions = 7;
+        let correctAnswers = 0;
+        let finalScore = 0; // Variable to track final score based on first attempts
+        let incorrectQuestions = [];
+        let explanations = {
+            'question1': 'The transit method detects exoplanets by observing the dimming of the light of a star light when a planet passes in front of it.',
+            'question2': 'The radial velocity method detects exoplanets by observing the wobble in a star caused by an orbiting planet’s gravitational pull.',
+            'question3': 'Direct imaging captures pictures of exoplanets by blocking the light from their star.',
+            'question4': 'Gravitational microlensing finds exoplanets by measuring how a planet’s gravity bends and magnifies light from a distant star.',
+            'question5': 'Astrometry detects exoplanets by measuring the slight movements of a star caused by an orbiting planet.',
+            'question6': 'Space telescopes help detect exoplanets by observing stars without interference from the atmosphere of Earth.',
+            'question7': 'Studying exoplanets helps us understand planetary formation and the potential for life beyond Earth.'
+        };
+
+        function checkAnswer(selectId, correctAnswer, nextSectionId) {
+    let userAnswer = document.getElementById(selectId).value;
+    let messageElement = document.getElementById(selectId + "-msg");
+    let selectElement = document.getElementById(selectId); // Get the select element
+
+    if (userAnswer === correctAnswer) {
+        if (!incorrectQuestions.includes(selectId)) { // Only increase score if the question wasn't previously answered incorrectly
+            correctAnswers++; // Increment correctAnswers only if it's the first correct attempt
+            finalScore++; // Increment final score
+        }
+        document.getElementById(nextSectionId).classList.remove('hidden');
+        messageElement.innerText = "Correct!";
+        messageElement.classList.add('correct');
+        selectElement.disabled = true;
+    } else {
+        // Check if the question is already in incorrectQuestions, if not, add it
+        if (!incorrectQuestions.includes(selectId)) {
+            incorrectQuestions.push(selectId); // Track incorrect answers once
+        }
+        messageElement.innerText = "Incorrect!";
+        messageElement.classList.add('incorrect');
+    }
+
+    // Stop the glow effect for this question
+    selectElement.classList.add('no-glow'); // Add the no-glow class
+
+    messageElement.classList.remove('hidden'); // Ensure message shows even after multiple clicks
+}
+
+
+
+        function submitOpenAnswer() {
+            var openAnswer = document.getElementById('openQuestion').value;
+            if (openAnswer.trim() === "") {
+                alert('Please provide an answer before submitting.');
+            } else {
+                document.getElementById('openQuestion').disabled = true;
+                document.getElementById('openQuestion-msg').innerText = "Thank you for your input!";
+                showReview(); // Show review after submitting open answer
+            }
+        }
+
+        function showReview() {
+            document.getElementById('reviewSection').classList.remove('hidden');
+            let reviewContent = '';
+            if (incorrectQuestions.length === 0) {
+                reviewContent = '<p>Congratulations! You answered all questions correctly.</p>';
+            } else {
+                reviewContent = '<p>Here’s a review of the questions you answered incorrectly:</p>';
+                incorrectQuestions.forEach((questionId) => {
+                    reviewContent += `<p><strong>Question:</strong> ${document.querySelector('label[for=' + questionId + ']').innerText}</p>`;
+                    reviewContent += `<p><strong>Explanation:</strong> ${explanations[questionId]}</p>`;
+                });
+            }
+
+            let score = `${finalScore}/${totalQuestions}`; // Use finalScore for the score
+            let percentage = Math.round((finalScore / totalQuestions) * 100);
+            reviewContent += `<p><strong>Your Score:</strong> ${score} (${percentage}%)</p>`;
+
+            document.getElementById('reviewContent').innerHTML = reviewContent;
+        }
+    </script>
+</head>
+<body>
+    <h1>Ways To Find Exoplanets</h1>
+
+    <section id="section1">
+        <p>The transit method is one of the most commonly used techniques to detect exoplanets by measuring the dimming of a star's light when a planet passes in front of it. As the exoplanet moves between the star and Earth, it causes a temporary decrease in the brightness of the star, indicating the presence of a planet. This method helps scientists determine the size, orbit, and sometimes the atmosphere of the planet.
+        </p>
+        <div class="question">
+            <label for="question1">What is the transit method?</label><br>
+            <select id="question1">
+                <option value="">--Select an answer--</option>
+                <option value="A">A. Observing changes in a star's color</option>
+                <option value="B">B. Measuring a star’s brightness dip when a planet transits</option>
+                <option value="C">C. Detecting gravitational waves</option>
+                <option value="D">D. Measuring a planet’s temperature directly</option>
+            </select>
+            <button onclick="checkAnswer('question1', 'B', 'section2')">Submit</button>
+            <p id="question1-msg"></p>
+        </div>
+    </section>
+
+    <section id="section2" class="hidden">
+        <p>The radial velocity method, also called the Doppler method, detects exoplanets by measuring the wobble of a star caused by the gravitational pull of an orbiting planet. As the planet orbits, it slightly shifts the star's position, which changes the wavelength of the star’s light. This change, known as the Doppler shift, helps scientists calculate the planet’s mass and orbit.</p>
+        <div class="question">
+            <label for="question2">What is the radial velocity method?</label><br>
+            <select id="question2">
+                <option value="">--Select an answer--</option>
+                <option value="A">A. Measuring the wobble of a star due to a planet's pull</option>
+                <option value="B">B. Counting how many stars a planet orbits</option>
+                <option value="C">C. Watching planets directly</option>
+                <option value="D">D. Observing how fast a planet spins</option>
+            </select>
+            <button onclick="checkAnswer('question2', 'A', 'section3')">Submit</button>
+            <p id="question2-msg"></p>
+        </div>
+    </section>
+
+    <section id="section3" class="hidden">
+        <p>Direct imaging is a method used to capture actual images of exoplanets by blocking the light from the host star to see the planet. This method is challenging because stars are much brighter than the planets orbiting them, but using advanced telescopes and instruments like coronagraphs, astronomers can directly photograph distant exoplanets. This method works best for finding large planets far from their stars.</p>
+        <div class="question">
+            <label for="question3">How does direct imaging work to find exoplanets?</label><br>
+            <select id="question3">
+                <option value="">--Select an answer--</option>
+                <option value="A">A. Blocking the star's light to photograph a planet</option>
+                <option value="B">B. Taking infrared pictures of planets’ moons</option>
+                <option value="C">C. Measuring a planet’s orbit from its shadow</option>
+                <option value="D">D. Using X-ray telescopes to find planets
+                </option>
+            </select>"checkAnswer('question3', 'A', 'section4')">Submit</button>
+            <p id="question3-msg"></p>
+        </div>
+    </section>
+
+    <section id="section4" class="hidden">
+        <p>Gravitational microlensing is a method that detects exoplanets by observing how the gravity of a planet or its star bends and magnifies the light from a distant background star. When a planet aligns with a distant star, the gravitational field of the planet acts as a lens, temporarily brightening the distant star. This method is effective for finding planets that are far from their host stars or even rogue planets that don't orbit any star.</p>
+        <div class="question">
+            <label for="question4">What is gravitational microlensing, and how does it help find exoplanets?</label><br>
+            <select id="question4">
+                <option value="">--Select an answer--</option>
+                <option value="A">A. Detecting light bending due to a planet’s gravity</option>
+                <option value="B">B. Observing planets that emit their own light</option>
+                <option value="C">C. Watching the planet’s orbit directly</option>
+                <option value="D">D. Measuring the heat from the planet</option>
+            </select>
+            <button onclick="checkAnswer('question4', 'A', 'section5')">Submit</button>
+            <p id="question4-msg"></p>
+        </div>
+    </section>
+
+    <section id="section5" class="hidden">
+        <p>The astrometry method involves measuring the tiny shifts in a star’s position in the sky as an exoplanet orbits around it. Just like the radial velocity method detects a wobble in the star’s light, astrometry focuses on the actual movement of the star itself. This method can determine the mass and orbit of the planet, though it is less commonly used due to the difficulty of detecting small shifts in distant stars.</p>
+        <div class="question">
+            <label for="question5">How does the astrometry method work to detect exoplanets?</label><br>
+            <select id="question5">
+                <option value="">--Select an answer--</option>
+                <option value="A">A. Counting how many moons orbit a planet</option>
+                <option value="B">B. Looking at how fast planets orbit stars</option>
+                <option value="C">C. Measuring the heat coming from a planet</option>
+                <option value="D">D. Watching the actual movement of the star due to a planet</option>
+            </select>
+            <button onclick="checkAnswer('question5', 'D', 'section6')">Submit</button>
+            <p id="question5-msg"></p>
+        </div>
+    </section>
+
+    <section id="section6" class="hidden">
+        <p>Space telescopes, like Kepler and TESS, play a crucial role in detecting exoplanets by continuously monitoring thousands of stars. They are positioned outside Earth’s atmosphere, which allows them to capture clearer data without interference from atmospheric distortions. These telescopes have discovered thousands of exoplanets using methods like the transit technique and have revolutionized our understanding of planetary systems beyond our own.</p>
+        <div class="question">
+            <label for="question6">What role do space telescopes play in detecting exoplanets?</label><br>
+            <select id="question6">
+                <option value="">--Select an answer--</option>
+                <option value="A">A. Observing stars from space without atmospheric interference</option>
+                <option value="B">B. Looking for planets within the solar system</option>
+                <option value="C">C. Only tracking the brightest stars</option>
+                <option value="D">D. Mapping the Milky Way galaxy</option>
+            </select>
+            <button onclick="checkAnswer('question6', 'A', 'section7')">Submit</button>
+            <p id="question6-msg"></p>
+        </div>
+    </section>
+
+    <section id="section7" class="hidden">
+        <p>The study of exoplanets is crucial because it helps scientists understand how planets form, evolve, and whether any could support life. By finding and analyzing exoplanets, researchers can explore whether Earth-like conditions exist elsewhere in the universe. The discovery of planets in the habitable zone, where liquid water could exist, brings us closer to answering the age-old question of whether we are alone in the universe.</p>
+        <div class="question">
+            <label for="question7">Why is the study of exoplanets important?</label><br>
+            <select id="question7">
+                <option value="">--Select an answer--</option>
+                <option value="A">A. To find planets that could support life</option>
+                <option value="B">B. Only to learn more about stars</option>
+                <option value="C">C. To discover new types of moons</option>
+                <option value="D">D. To see how many planets are in the solar system</option>
+            </select>
+            <button onclick="checkAnswer('question7', 'A', 'openQuestionSection')">Submit</button>
+            <p id="question7-msg"></p>
+        </div>
+    </section>
+
+    <section id="openQuestionSection" class="hidden">
+        <p>In addition to the multiple-choice questions, please answer the following open-ended question:</p>
+        <textarea id="openQuestion" rows="4" cols="50" placeholder="In your opinion, what is the most effective way to find exoplanets."></textarea><br>
+        <button onclick="submitOpenAnswer()">Submit Open-Ended Answer</button>
+        <p id="openQuestion-msg"></p>
+    </section>
+
+    <section id="reviewSection" class="hidden">
+        <h2>Your Review</h2>
+        <div id="reviewContent"></div>
+    </section>
+</body>
+</html>

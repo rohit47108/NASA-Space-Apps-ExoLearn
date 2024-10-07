@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exoplanets</title>
+    <style>
+        /* Space-themed dynamic background */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background: url('https://www.solarsystemscope.com/textures/download/2k_stars_milky_way.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            color: #00ffff;
+            text-align: center;
+            font-size: 3rem;
+            text-shadow: 0 0 20px #00ffff;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin: 15px 0;
+        }
+
+        .question {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+        }
+
+        select, textarea, button {
+            font-size: 1.1rem;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #00ffff;
+            background-color: #001f3f;
+            color: white;
+            width: 100%;
+        }
+
+        button {
+            background-color: #00ffff;
+            color: black;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #00aaff;
+        }
+
+        /* Message styles */
+        .correct {
+            color: #00ff00;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .incorrect {
+            color: #ff4444;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff4444;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Review section */
+        #reviewSection {
+            margin: 30px 0;
+            padding: 30px;
+            background-color: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.9);
+        }
+
+        /* Make labels glow */
+        label {
+            color: #00ffff;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        /* Add animations */
+        @keyframes glow {
+            0% { box-shadow: 0 0 10px #00ffff; }
+            50% { box-shadow: 0 0 20px #00aaff; }
+            100% { box-shadow: 0 0 10px #00ffff; }
+        }
+
+        button, select, textarea {
+            animation: glow 0.75s ease-in-out infinite alternate;
+        }
+    </style>
+    <script>
+        let totalQuestions = 7;
+        let correctAnswers = 0;
+        let finalScore = 0; // Variable to track final score based on first attempts
+        let incorrectQuestions = [];
+        let explanations = {
+            'question1': 'Exoplanets specifically refer to those that exist beyond our solar system, making them crucial for the study of potential extraterrestrial life.',
+            'question2': 'The potential for finding life on exoplanets is a primary motivator for scientists, as it may answer fundamental questions about our place in the universe.',
+            'question3': 'Liquid water and a stable atmosphere are vital for life as we know it, making them critical factors in identifying potentially habitable exoplanets.',
+            'question4': 'Analyzing the light spectrum of an exoplanets atmosphere allows scientists to detect chemicals that may suggest the presence of life.',
+            'question5': 'Certain exoplanets located in the habitable zones of their stars are considered potential candidates for supporting life due to favorable conditions.',
+            'question6': 'The significant distances and dim light from exoplanets present challenges for detection and study, requiring advanced technologies to gather data.',
+            'question7': 'Continued advancements in technology and new missions will enhance our ability to study exoplanets, increasing the chances of finding signs of life.'
+        };
+
+        function checkAnswer(selectId, correctAnswer, nextSectionId) {
+    let userAnswer = document.getElementById(selectId).value;
+    let messageElement = document.getElementById(selectId + "-msg");
+    let selectElement = document.getElementById(selectId); // Get the select element
+
+    if (userAnswer === correctAnswer) {
+        if (!incorrectQuestions.includes(selectId)) { // Only increase score if the question wasn't previously answered incorrectly
+            correctAnswers++; // Increment correctAnswers only if it's the first correct attempt
+            finalScore++; // Increment final score
+        }
+        document.getElementById(nextSectionId).classList.remove('hidden');
+        messageElement.innerText = "Correct!";
+        messageElement.classList.add('correct');
+        selectElement.disabled = true;
+    } else {
+        // Check if the question is already in incorrectQuestions, if not, add it
+        if (!incorrectQuestions.includes(selectId)) {
+            incorrectQuestions.push(selectId); // Track incorrect answers once
+        }
+        messageElement.innerText = "Incorrect!";
+        messageElement.classList.add('incorrect');
+    }
+
+    // Stop the glow effect for this question
+    selectElement.classList.add('no-glow'); // Add the no-glow class
+
+    messageElement.classList.remove('hidden'); // Ensure message shows even after multiple clicks
+}
+
+
+
+        function submitOpenAnswer() {
+            var openAnswer = document.getElementById('openQuestion').value;
+            if (openAnswer.trim() === "") {
+                alert('Please provide an answer before submitting.');
+            } else {
+                document.getElementById('openQuestion').disabled = true;
+                document.getElementById('openQuestion-msg').innerText = "Thank you for your input!";
+                showReview(); // Show review after submitting open answer
+            }
+        }
+
+        function showReview() {
+            document.getElementById('reviewSection').classList.remove('hidden');
+            let reviewContent = '';
+            if (incorrectQuestions.length === 0) {
+                reviewContent = '<p>Congratulations! You answered all questions correctly.</p>';
+            } else {
+                reviewContent = '<p>Here’s a review of the questions you answered incorrectly:</p>';
+                incorrectQuestions.forEach((questionId) => {
+                    reviewContent += `<p><strong>Question:</strong> ${document.querySelector('label[for=' + questionId + ']').innerText}</p>`;
+                    reviewContent += `<p><strong>Explanation:</strong> ${explanations[questionId]}</p>`;
+                });
+            }
+
+            let score = `${finalScore}/${totalQuestions}`; // Use finalScore for the score
+            let percentage = Math.round((finalScore / totalQuestions) * 100);
+            reviewContent += `<p><strong>Your Score:</strong> ${score} (${percentage}%)</p>`;
+
+            document.getElementById('reviewContent').innerHTML = reviewContent;
+        }
+    </script>
+</head>
+<body>
+    <h1>Exoplanets: A Hope For Another Earth</h1>
+
+    <section id="section1">
+        <p>Exoplanets are planets that orbit stars outside our solar system. Scientists have discovered thousands of these planets through various methods, including observing the dimming of a star's light when a planet passes in front of it. This discovery has opened up a new field of study focused on the potential for life beyond Earth. Understanding what exoplanets are is the first step in investigating their potential for supporting life.</p>
+        <div class="question">
+            <label for="question1">What are exoplanets?</label><br>
+            <select id="question1">
+                <option value="">--Select an answer--</option>
+                <option value="A">A. Planets within our solar system</option>
+                <option value="B">B. Planets that orbit stars outside our solar system</option>
+                <option value="C">C. Moons of other planets</option>
+                <option value="D">D. Asteroids in the asteroid belt</option>
+            </select>
+            <button onclick="checkAnswer('question1', 'B', 'section2')">Submit</button>
+            <p id="question1-msg"></p>
+        </div>
+    </section>
+
+    <section id="section2" class="hidden">
+        <p>Scientists are interested in exoplanets because they could provide answers to the age-old question of whether life exists elsewhere in the universe. The discovery of these distant worlds has changed our understanding of how planetary systems form and function. By examining exoplanets, researchers aim to find conditions that may support life, leading to exciting possibilities for future exploration and discovery.</p>
+        <div class="question">
+            <label for="question2">Why are scientists interested in exoplanets?</label><br>
+            <select id="question2">
+                <option value="">--Select an answer--</option>
+                <option value="A">A. They are made of precious metals
+                <option value="B">B. They could hold the key to extraterrestrial life</option>
+                <option value="C"> C. They are closer than our solar system planets</option>
+                <option value="D">D. They are easier to study than stars</option>
+            </select>
+            <button onclick="checkAnswer('question2', 'B', 'section3')">Submit</button>
+            <p id="question2-msg"></p>
+        </div>
+    </section>
+
+    <section id="section3" class="hidden">
+        <p>Certain conditions are necessary for life as we know it to thrive. These include the presence of liquid water, a stable atmosphere, and temperatures that allow for liquid water to exist. Exoplanets located in the "habitable zone" of their stars are of particular interest because this is where conditions are right for life to develop. Finding these conditions is essential in the search for extraterrestrial life.</p>
+        <div class="question">
+            <label for="question3">What conditions are necessary for life?</label><br>
+            <select id="question3">
+                <option value="">--Select an answer--</option>
+                <option value="A"> A. Solid rock surfaces</option>
+                <option value="B">B. High levels of radiation</option>
+                <option value="C">C. Presence of liquid water and a stable atmosphere</option>
+                <option value="D">D. Extreme temperatures</option>
+            </select>
+            <button onclick="checkAnswer('question3', 'C', 'section4')">Submit</button>
+            <p id="question3-msg"></p>
+        </div>
+    </section>
+
+    <section id="section4" class="hidden">
+        <p>Scientists use various techniques to detect signs of life on exoplanets. One common method is spectroscopy, which analyzes the light from a planet's atmosphere to identify chemical signatures. For example, finding gases like oxygen or methane could indicate biological activity. Upcoming space telescopes will enhance our ability to study exoplanet atmospheres, making the search for life more efficient.</p>
+        <div class="question">
+            <label for="question4">How do scientists detect signs of life on exoplanets?</label><br>
+            <select id="question4">
+
+                <option value="">--Select an answer--</option>
+                <option value="A">A. By measuring the planet's size</option>
+                <option value="B">B. By analyzing the light from the planet’s atmosphere</option>
+                <option value="C">C. By sending robots to the planet</option>
+                <option value="D">D. By observing the planet’s orbit</option>
+            </select>
+            <button onclick="checkAnswer('question4', 'B', 'section5')">Submit</button>
+            <p id="question4-msg"></p>
+        </div>
+    </section>
+
+    <section id="section5" class="hidden">
+        <p>Yes, several exoplanets have been identified as potential candidates for supporting life. Some examples include Proxima Centauri b and Kepler-186f, which lie within their stars' habitable zones. These planets have characteristics that suggest they could hold liquid water. However, more research is needed to confirm their habitability and whether they possess the necessary conditions for life.</p>
+        <div class="question">
+            <label for="question5">Have any exoplanets been found that might support life?</label><br>
+            <select id="question5">
+
+                <option value="">--Select an answer--</option>
+                <option value="A">A. No, all exoplanets are too far away</option>
+                <option value="B">B. Yes, some are located in habitable zones</option>
+                <option value="C">C. Only gas giants can support life</option>
+                <option value="D">D. Exoplanets have been found, but they are uninhabitable</option>
+            </select>
+            <button onclick="checkAnswer('question5', 'B', 'section6')">Submit</button>
+            <p id="question5-msg"></p>
+        </div>
+    </section>
+
+    <section id="section6" class="hidden">
+        <p>Studying exoplanets presents several challenges. Their vast distances from Earth make direct observation difficult, and many are faint compared to their bright stars. Scientists must find ways to isolate the light of a planet from that of its star. New techniques and technologies are constantly being developed to overcome these challenges and improve our understanding of these distant worlds.</p>
+        <div class="question">
+            <label for="question6">What challenges do scientists face in studying exoplanets?</label><br>
+            <select id="question6">
+                <option value="">--Select an answer--</option>
+                <option value="A">A. They are too close to Earth</option>
+                <option value="B">B. Their light is too bright</option>
+                <option value="C">C. Their vast distances and faintness make observation difficul</option>
+                <option value="D">D. They do not exist</option>
+            </select>
+            <button onclick="checkAnswer('question6', 'B', 'section7')">Submit</button>
+            <p id="question6-msg"></p>
+        </div>
+    </section>
+
+    <section id="section7" class="hidden">
+        <p>The future of exoplanet research looks promising. New telescopes and missions are being planned to gather more data on these distant planets. Scientists aim to study exoplanet atmospheres, search for biosignatures, and explore the potential for life beyond our solar system. As technology advances, we may be one step closer to discovering if life exists on exoplanets.</p>
+        <div class="question">
+            <label for="question7">What is the future of exoplanet research?</label><br>
+            <select id="question7">
+                <option value="">--Select an answer--</option>
+                <option value="A">A. There will be no more research</option>
+                <option value="B">B. New technologies will improve our understanding of exoplanets</option>
+                <option value="C">C. Only gas giants will be studied</option>
+                <option value="D">D. Research will focus on asteroids</option>
+            </select>
+            <button onclick="checkAnswer('question7', 'B', 'openQuestionSection')">Submit</button>
+            <p id="question7-msg"></p>
+        </div>
+    </section>
+
+    <section id="openQuestionSection" class="hidden">
+        <p>In addition to the multiple-choice questions, please answer the following open-ended question:</p>
+        <textarea id="openQuestion" rows="4" cols="50" placeholder="In your opinion, what is the most exciting aspect of exoplanet exploration?"></textarea><br>
+        <button onclick="submitOpenAnswer()">Submit Open-Ended Answer</button>
+        <p id="openQuestion-msg"></p>
+    </section>
+
+    <section id="reviewSection" class="hidden">
+        <h2>Your Review</h2>
+        <div id="reviewContent"></div>
+    </section>
+</body>
+</html>
